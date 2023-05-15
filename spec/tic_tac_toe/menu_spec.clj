@@ -1,10 +1,13 @@
 (ns tic-tac-toe.menu-spec
   (:require [speclj.core :refer :all]
-            [tic-tac-toe.game :refer :all]
+            [tic-tac-toe.game :as game :refer :all]
             [tic-tac-toe.menu :refer :all])
   (:import (tic_tac_toe.menu AiGame ComputerPlayerMenu DifficultyMenu GameModeMenu MainMenu PlayerVComputerGame PvPGame)))
 
 (describe "displays tic-tac-toe game"
+
+  ;(around [it] (with-out-str (it)))
+
   (it "prompts the user again after no input"
     (should-be-a GameModeMenu (next-state (GameModeMenu. 3) nil)))
 
@@ -23,8 +26,17 @@
       (should-be-nil (next-state game 8))))
 
   (it "progresses ai game to end automatically"
-    (let [game (AiGame. (new-game))]
-      (should-be-nil (next-state game nil))))
+    (let [game  (AiGame. (new-game))
+          moves (atom (range 9))
+          calls (atom 0)]
+      (with-redefs [game/next-move (fn [_ board]
+                                     (let [move (first @moves)]
+                                       (swap! moves rest)
+                                       (swap! calls inc)
+                                       (game/move move (game/cur-token board) board)))
+                    println (fn [& _])]
+        (should-be-nil (next-state game nil))
+        (should= 7 @calls))))
 
   (it "prompts the user to select a token"
     (let [menu (ComputerPlayerMenu. {:dim 3})]

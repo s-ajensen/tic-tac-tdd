@@ -11,7 +11,7 @@
       (let [input (read-line)]
         (game-loop (next-state state (Integer/parseInt input)))))))
 
-(defn main []
+(defn -main []
   (game-loop (MainMenu.)))
 
 #_(main)

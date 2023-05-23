@@ -11,9 +11,9 @@
 
   (it "delegates the competition type based on user input"
     (let [menu (GameModeMenu. {:dim 3})]
-      (should-be-a PvPGame (next-state (GameModeMenu. {:dim 3}) 1))
+      (should-be-a PvPGame (next-state menu 1))
       (should-be-a ComputerPlayerMenu (next-state (GameModeMenu. {:dim 3}) 2))
-      (should-be-a AiGame (next-state (GameModeMenu. {:dim 3}) 3))))
+      (should-be-a AiGame (next-state menu 3))))
 
   (it "continues to prompt users for pvp games"
     (let [menu (PvPGame. (new-game))]
@@ -27,11 +27,11 @@
     (let [game  (AiGame. (new-game))
           moves (atom (range 9))
           calls (atom 0)]
-      (with-redefs [game/next-move (fn [_ board]
-                                     (let [move (first @moves)]
+      (with-redefs [next-move (fn [_ board]
+                                     (let [first-move (first @moves)]
                                        (swap! moves rest)
                                        (swap! calls inc)
-                                       (game/move move (game/cur-token board) board)))
+                                       (move first-move (cur-token board) board)))
                     println (fn [& _])]
         (should-be-nil (next-state game nil))
         (should= 7 @calls))))

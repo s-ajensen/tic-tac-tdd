@@ -1,3 +1,3 @@
 (ns tic-tac-toe.db)
 
-(defn open-games? [])
+(defn open-game [])

@@ -1,5 +1,6 @@
 (ns tic-tac-toe.menu
-  (:require [tic-tac-toe.game :refer :all]))
+  (:require [tic-tac-toe.game :refer :all]
+            [tic-tac-toe.db :as db]))
 
 (defprotocol MenuLink
   (render [this])
@@ -92,8 +93,25 @@
       (= 1 x) (GameModeMenu. {:dim 3})
       (= 2 x) (GameModeMenu. {:dim 4}))))
 
-(deftype MainMenu []
+(deftype ContinueGameMenu [open-game]
   MenuLink
   (render [this]
-    (str "1) Continue"))
-  (next-state [_ x] nil))
+    (as-string open-game))
+  (next-state [_ _]
+    ))
+
+(deftype ReplayMenu []
+  MenuLink)
+
+(deftype MainMenu [open-game]
+  MenuLink
+  (render [this]
+    (let [options "1) New Game\n2) Replay Game"]
+      (if (nil? open-game)
+        options
+        (str "0) Continue\n" options))))
+  (next-state [_ x]
+    (cond
+      (= 0 x) (ContinueGameMenu. open-game)
+      (= 1 x) (SizeMenu.)
+      (= 2 x) (ReplayMenu.))))

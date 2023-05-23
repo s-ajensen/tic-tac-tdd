@@ -1,6 +1,6 @@
 (ns tic-tac-toe.core
   (:require [tic-tac-toe.menu :refer :all])
-  (:import (tic_tac_toe.menu SizeMenu)))
+  (:import (tic_tac_toe.menu MainMenu)))
 
 (defn game-loop [state]
   (if (nil? state)
@@ -12,6 +12,6 @@
         (game-loop (next-state state (Integer/parseInt input)))))))
 
 (defn main []
-  (game-loop (SizeMenu.)))
+  (game-loop (MainMenu. nil)))
 
 #_(main)

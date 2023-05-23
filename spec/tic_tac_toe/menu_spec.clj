@@ -3,9 +3,14 @@
             [tic-tac-toe.game :refer :all]
             [tic-tac-toe.menu :refer :all]
             [tic-tac-toe.db :as db])
-  (:import (tic_tac_toe.menu AiGame ComputerPlayerMenu DifficultyMenu GameModeMenu MainMenu SizeMenu PlayerVComputerGame PvPGame)))
+  (:import (tic_tac_toe.menu AiGame ComputerPlayerMenu ContinueGameMenu DifficultyMenu GameModeMenu MainMenu ReplayMenu SizeMenu PlayerVComputerGame PvPGame)))
 
-(describe "displays tic-tac-toe game"
+(def ^:dynamic empty-games-menu :empty-games-menu)
+(def ^:dynamic game-in-progress-menu :game-in-progress-menu)
+(def ^:dynamic continue-menu :populated-continue-menu)
+(def open-game (new-game))
+
+(describe "tic tac toe console menu"
   (it "prompts the user again after no input"
     (should-be-a GameModeMenu (next-state (GameModeMenu. 3) nil)))
 
@@ -86,6 +91,31 @@
     (should= "Select board size: \n1) 3x3 \n2) 4x4"
       (render (SizeMenu.))))
 
-  (it "prompts the user to continue a game if there is one in progress"
-    (with-redefs [db/open-games? (stub :mock-open-games {:return true})]
-      (should-contain "1) Continue" (render (MainMenu.))))))
+  (describe "main menu"
+    (with-stubs)
+    (around [it] (binding [empty-games-menu (MainMenu. nil)
+                           game-in-progress-menu (MainMenu. 1)] (it)))
+
+    (it "prompts user to continue a game if there is one in progress"
+      (should-contain "0) Continue" (render game-in-progress-menu))
+      (should-not-contain "Continue" (render empty-games-menu)))
+
+    (it "prompts user to start or replay a game"
+      (should-contain "1) New Game\n2) Replay Game" (render empty-games-menu))
+      (should-contain "0) Continue\n1) New Game\n2) Replay Game" (render game-in-progress-menu)))
+
+    (it "sends user to game in progress"
+      (should-be-a ContinueGameMenu (next-state game-in-progress-menu 0)))
+
+    (it "starts a new game"
+      (should-be-a SizeMenu (next-state empty-games-menu 1)))
+
+    (it "send user to replay menu"
+      (should-be-a ReplayMenu (next-state empty-games-menu 2))))
+
+  (describe "continue game menu"
+    (with-stubs)
+    (around [it] (binding [continue-menu (ContinueGameMenu. open-game)] (it)))
+
+    (it "displays open game"
+      (should= (as-string open-game) (render continue-menu)))))

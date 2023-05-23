@@ -1,8 +1,9 @@
 (ns tic-tac-toe.menu-spec
   (:require [speclj.core :refer :all]
             [tic-tac-toe.game :refer :all]
-            [tic-tac-toe.menu :refer :all])
-  (:import (tic_tac_toe.menu AiGame ComputerPlayerMenu DifficultyMenu GameModeMenu MainMenu PlayerVComputerGame PvPGame)))
+            [tic-tac-toe.menu :refer :all]
+            [tic-tac-toe.db :as db])
+  (:import (tic_tac_toe.menu AiGame ComputerPlayerMenu DifficultyMenu GameModeMenu MainMenu SizeMenu PlayerVComputerGame PvPGame)))
 
 (describe "displays tic-tac-toe game"
   (it "prompts the user again after no input"
@@ -50,6 +51,32 @@
       (should= (new-game `(\X \X nil \O \O nil nil nil nil)) (next-move :med board))))
 
   (it "prompts the user to select board size"
-    (let [menu (MainMenu.)]
+    (let [menu (SizeMenu.)]
       (should-be-a GameModeMenu (next-state menu 1))
-      (should-be-a GameModeMenu (next-state menu 2)))))
+      (should-be-a GameModeMenu (next-state menu 2))))
+
+  (it "game frames render the current state of the board"
+    (let [board   (new-game)
+          view    (as-string board)]
+      (should= view (render (PvPGame. board)))
+      (should= view (render (AiGame. board)))))
+
+  (it "difficulty menu prompts user"
+    (should= "Select difficulty:\n1) Hard [unbeatable]\n2) Medium\n3) Easy\n"
+      (render (DifficultyMenu. (new-game)))))
+
+  (it "computer player menu prompts user"
+    (should= "Play as:\n1) X\n2) O\n"
+      (render (ComputerPlayerMenu. #{}))))
+
+  (it "game mode menu prompts user"
+    (should= "Enter game mode:\n1) Human v. Human\n2) Human v. Computer\n3) Computer v. Computer"
+      (render (GameModeMenu. #{}))))
+
+  (it "size menu prompts user"
+    (should= "Select board size: \n1) 3x3 \n2) 4x4"
+      (render (SizeMenu.))))
+
+  (it "prompts the user to continue a game if there is one in progress"
+    (with-redefs [db/open-games? (stub :mock-open-games {:return true})]
+      (should-contain "1) Continue" (render (MainMenu.))))))

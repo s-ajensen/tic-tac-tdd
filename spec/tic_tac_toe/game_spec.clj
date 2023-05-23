@@ -61,7 +61,8 @@
                  (move 1 \O)
                  (next-move nil)
                  (filter #(= \X %))
-                 (count))))
+                 (count)))
+    (should= \O (cur-token [\X \O \X \O \X \O \X nil nil nil nil nil nil nil nil nil])))
 
   (it "blocks a player from taking a win"
     (should=

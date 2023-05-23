@@ -16,10 +16,12 @@
   (= 1 (rem (count (filter nil? board)) 2)))
 
 (defn cur-token [board]
-  (if (even-moves? board) \X \O))
+  (let [x (count (filter #(= \X %) board))
+        y (count (filter #(= \O %) board))]
+    (if (= x y) \X \O)))
 
 (defn next-token [board]
-  (if (even-moves? board) \O \X))
+  (if (= (cur-token board) \X) \O \X))
 
 (defn open-moves [board]
   (->> board
@@ -64,6 +66,7 @@
   (cond
     (win? board) (- 10 depth)
     (tie? board) 0
+    (= 2 depth) 0
     :else (let [best (best-move board)]
             (* -1 (prioritize
                     (move best (cur-token board) board)
@@ -73,7 +76,6 @@
 
 (defn max-move [moves]
   (->> moves
-    (sort-by second >)
     (first)
     (first)))
 

@@ -83,7 +83,7 @@
       (= 3 x) (AiGame. (empty-game (opts :dim)))
       :else (GameModeMenu. opts))))
 
-(deftype MainMenu []
+(deftype SizeMenu []
   MenuLink
   (render [this]
     (str "Select board size: \n" "1) 3x3 \n" "2) 4x4"))
@@ -91,3 +91,9 @@
     (cond
       (= 1 x) (GameModeMenu. {:dim 3})
       (= 2 x) (GameModeMenu. {:dim 4}))))
+
+(deftype MainMenu []
+  MenuLink
+  (render [this]
+    (str "1) Continue"))
+  (next-state [_ x] nil))

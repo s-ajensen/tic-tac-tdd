@@ -24,8 +24,17 @@
       (should-be-nil (next-state game 8))))
 
   (it "progresses ai game to end automatically"
-    (let [game (AiGame. (new-game))]
-      (should-be-nil (next-state game nil))))
+    (let [game  (AiGame. (new-game))
+          moves (atom (range 9))
+          calls (atom 0)]
+      (with-redefs [game/next-move (fn [_ board]
+                                     (let [move (first @moves)]
+                                       (swap! moves rest)
+                                       (swap! calls inc)
+                                       (game/move move (game/cur-token board) board)))
+                    println (fn [& _])]
+        (should-be-nil (next-state game nil))
+        (should= 7 @calls))))
 
   (it "prompts the user to select a token"
     (let [menu (ComputerPlayerMenu. {:dim 3})]
